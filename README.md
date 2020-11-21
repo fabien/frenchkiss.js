@@ -2,7 +2,7 @@
   <h1>💋 FrenchKiss.js</h1>
 
 [![Build Status](https://travis-ci.com/koala-interactive/frenchkiss.js.svg?branch=master)](https://travis-ci.com/koala-interactive/frenchkiss.js)
-[![File size](https://img.shields.io/badge/GZIP%20size-1.1%20kB-brightgreen.svg)](./dist/umd/frenchkiss.js)
+[![File size](https://img.shields.io/badge/GZIP%20size-1.2%20kB-brightgreen.svg)](./dist/umd/frenchkiss.js)
 ![](https://img.shields.io/badge/dependencies-none-brightgreen.svg)
 ![](https://img.shields.io/snyk/vulnerabilities/github/koala-interactive/frenchkiss.js.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-brightgreen.svg)](https://opensource.org/licenses/MIT)
@@ -75,11 +75,14 @@ Tell FrenchKiss what to return by simply giving it a table object, where the key
 ```js
 import frenchkiss from 'frenchkiss';
 
+// Unlike the original frenchkiss, multiple instances can be created
+const i18n = frenchkiss();
+
 // Define the locale language
-frenchkiss.locale('en');
+i18n.locale('en');
 
 // Add translations in each languages
-frenchkiss.set('en', {
+i18n.set('en', {
   hello: 'Hello {name} !',
   fruits: {
     apple: 'apples'
@@ -87,16 +90,16 @@ frenchkiss.set('en', {
   // and other sentences...
 });
 
-frenchkiss.t('hello', {
+i18n.t('hello', {
   name: 'John',
 }); // => 'Hello John !'
 
-frenchkiss.t('fruits.apple'); // => 'apples'
+i18n.t('fruits.apple'); // => 'apples'
 ```
 
 ---
 
-### frenchkiss.locale(language?: string): string
+### i18n.locale(language?: string): string
 
 Get or set the locale, it will define what table FrenchKiss have to work with.
 
@@ -104,12 +107,12 @@ Get or set the locale, it will define what table FrenchKiss have to work with.
 
 ---
 
-### frenchkiss.set(language: string, table: object)
+### i18n.set(language: string, table: object)
 
 Define the translation table for the language. Any call to the specified language erase all the previously stored data.
 
 ```js
-frenchkiss.set('en', {
+i18n.set('en', {
   hello: 'Hi, ',
   howareyou: 'How are you ?',
   // ...
@@ -118,7 +121,7 @@ frenchkiss.set('en', {
 
 ---
 
-### frenchkiss.t(key: string, params?: object, lang?: string): string
+### i18n.t(key: string, params?: object, lang?: string): string
 
 The most used method to returns translation. It's built with performance in mind.
 Here is what you should know about it :
@@ -147,14 +150,14 @@ If you are working with concurrent connections it's also possible to use the thi
 Doing a generator that forces the language use and pass it to your function can be what you are looking for.
 
 ```js
-frenchkiss.locale('fr');
-frenchkiss.set('en', {
+i18n.locale('fr');
+i18n.set('en', {
   hello: 'Hello {name} !',
 });
 
 // Helper
 const generateLanguageTranslator = lang => {
-  return (key, params) => frenchkiss.t(key, params, lang);
+  return (key, params) => i18n.t(key, params, lang);
 };
 
 // Generate t that force language
@@ -168,19 +171,19 @@ t('hello', { name: 'Anna' }); // => 'Hello Anna !'
 
 ---
 
-### frenchkiss.extend(language: string, table: object)
+### i18n.extend(language: string, table: object)
 
 Extend the translation table for the language. In contrary of `set()`, the previously stored data will be kept.
 
 ---
 
-### frenchkiss.unset(language: string)
+### i18n.unset(language: string)
 
 If you need to clean the data of a stored language for memory optimizations, unset is all you need.
 
 ---
 
-### frenchkiss.fallback(language?: string): string
+### i18n.fallback(language?: string): string
 
 Get or set the fallback. Define what table FrenchKiss will use to fallback in case the locale table doesn't have the required translation.
 
@@ -205,39 +208,39 @@ t('howareyou'); // => 'How are you ?' <- from 'en' fallback
 
 ---
 
-### frenchkiss.onMissingKey(fn: Function)
+### i18n.onMissingKey(fn: Function)
 
 When the client requests a missing key, frenchKiss will returns the key as result. It's possible to handle it and return what you want or just send an event to your error reporting system.
 
 ```js
-frenchkiss.t('missingkey'); // => 'missingkey'
+i18n.t('missingkey'); // => 'missingkey'
 
-frenchkiss.onMissingKey((key, params, locale) => {
+i18n.onMissingKey((key, params, locale) => {
   // Send error to your server
-  sendReport(`Missing the key "${key}" in ${frenchkiss.locale()} language.`);
+  sendReport(`Missing the key "${key}" in ${i18n.locale()} language.`);
 
   // Returns the text you want
   return `An error happened (${key})`;
 });
 
-frenchkiss.t('missingkey'); // => 'An error happened (missingkey)'
+i18n.t('missingkey'); // => 'An error happened (missingkey)'
 ```
 
 ---
 
-### frenchkiss.onMissingVariable(fn: Function)
+### i18n.onMissingVariable(fn: Function)
 
 It's possible to handle missing variables, sending errors to your monitoring server or handle it directly by returning something to replace with.
 
 ```js
-frenchkiss.set('en', {
+i18n.set('en', {
   hello: 'Hello {name} !',
 });
-frenchkiss.locale('en');
+i18n.locale('en');
 
-frenchkiss.t('hello'); // => 'Hello  !'
+i18n.t('hello'); // => 'Hello  !'
 
-frenchkiss.onMissingVariable((variable, key, language) => {
+i18n.onMissingVariable((variable, key, language) => {
   // Send error to your server
   sendReport(`Missing the variable "${variable}" in ${language}->${key}.`);
 
@@ -245,7 +248,7 @@ frenchkiss.onMissingVariable((variable, key, language) => {
   return `[missing:${variable}]`;
 });
 
-frenchkiss.t('hello'); // => 'Hello [missing:name] !'
+i18n.t('hello'); // => 'Hello [missing:name] !'
 ```
 
 ---
@@ -255,7 +258,7 @@ frenchkiss.t('hello'); // => 'Hello [missing:name] !'
 Under the hood, frenchkiss allows you to handle nested keys, by using `'.'` inside key names.
 
 ```js
-frenchkiss.set('en', {
+i18n.set('en', {
   fruits: {
     apple: 'An apple',
     banana: 'A banana'
@@ -266,27 +269,27 @@ frenchkiss.set('en', {
   }
 });
 
-frenchkiss.t('fruits.apple') // => 'An apple'
+i18n.t('fruits.apple') // => 'An apple'
 ```
 
 Accessing an object directly will result on the `onMissingKey` method to be called:
 
 ```js
-frenchkiss.set('en', {
+i18n.set('en', {
   fruits: {
     apple: 'An apple',
     banana: 'A banana'
   }
 });
 
-frenchkiss.onMissingKey(key => `[notfound:${key}]`);
-frenchkiss.t('fruits'); // => '[notfound:fruits]'
+i18n.onMissingKey(key => `[notfound:${key}]`);
+i18n.t('fruits'); // => '[notfound:fruits]'
 ```
 
 In case of duplicate names on key and objects, do not expect the result to be uniform (in fact, just don't do it).
 
 ```js
-frenchkiss.set('en', {
+i18n.set('en', {
   'fruits.apple.green': 1,
   'fruits.apple': {
     'green': 2
@@ -299,7 +302,7 @@ frenchkiss.set('en', {
   }
 });
 
-frenchkiss.t('fruits.apple.green'); // => '1' or '2' or '3' or '4'
+i18n.t('fruits.apple.green'); // => '1' or '2' or '3' or '4'
 ```
 
 ---

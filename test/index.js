@@ -1,6 +1,8 @@
 import chai, { expect } from 'chai';
 import spies from 'chai-spies';
-import i18n from '../src/frenchkiss';
+import frenchkiss from '../src/frenchkiss';
+
+const i18n = frenchkiss();
 
 chai.use(spies);
 
